@@ -3,17 +3,29 @@ import { Smile, Paperclip, Send, MoreVertical } from "lucide-react";
 import React from "react";
 import { ChatAreaProps, Message } from "./type";
 import pusherService from "../../services/pusher-service/pusher";
+import {
+  getMessagesGroup,
+  getMessagesUser,
+  sendMessagesGroup,
+  sendMessagesUser,
+} from "../../services/api-service/api-service";
+import { TDataSideBar } from "../Sidebar/type";
 
-const ChatArea: React.FC<ChatAreaProps> = ({ activeChat, toggleGroupInfo }) => {
+const ChatArea: React.FC<ChatAreaProps> = ({
+  activeChat,
+  typeChat,
+  toggleGroupInfo,
+}) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [information, setInformation] = useState<TDataSideBar>(Object);
 
   useEffect(() => {
     fetchMessages();
-  }, []);
+  }, [activeChat, typeChat]);
 
   useEffect(() => {
     scrollToBottom();
@@ -26,39 +38,59 @@ const ChatArea: React.FC<ChatAreaProps> = ({ activeChat, toggleGroupInfo }) => {
   const fetchMessages = async () => {
     setIsLoading(true);
     setError(null);
-    try {
-      const response = await fetch("/api/messages");
-      if (!response.ok) {
-        throw new Error("Failed to fetch messages");
+    if (typeChat == "group") {
+      try {
+        const response = await getMessagesGroup(activeChat);
+        setInformation(response.information);
+        setMessages(response.messages);
+      } catch (err) {
+        setError("Failed to load messages. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
-      const data = await response.json();
-      setMessages(data);
-    } catch (err) {
-      setError("Failed to load messages. Please try again later.");
-    } finally {
-      setIsLoading(false);
+    } else if (typeChat == "user") {
+      try {
+        const response = await getMessagesUser(activeChat);
+        setInformation(response.information);
+        setMessages(response.messages);
+      } catch (err) {
+        setError("Failed to load messages. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
-      try {
-        const response = await fetch("/api/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ sender: "You", content: message }),
-        });
-        if (!response.ok) {
-          throw new Error("Failed to send message");
+      if (typeChat == "group") {
+        try {
+          const value = {
+            content: message,
+          };
+          const response = await sendMessagesGroup(activeChat, value);
+          setMessages((prevMessages) => [...prevMessages, response.message]);
+          setMessage("");
+        } catch (err) {
+          setError("Failed to load messages. Please try again later.");
+        } finally {
+          setIsLoading(false);
         }
-        const newMessage = await response.json();
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setMessage("");
-      } catch (err) {
-        setError("Failed to send message. Please try again.");
+      } else if (typeChat == "user") {
+        try {
+          const value = {
+            receiver_id: activeChat,
+            content: message,
+          };
+          const response = await sendMessagesUser(value);
+          setMessages((prevMessages) => [...prevMessages, response.message]);
+          setMessage("");
+        } catch (err) {
+          setError("Failed to load messages. Please try again later.");
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
   };
@@ -82,22 +114,22 @@ const ChatArea: React.FC<ChatAreaProps> = ({ activeChat, toggleGroupInfo }) => {
           <img
             className="w-10 h-10 rounded-full object-cover"
             src={
-              activeChat === "group"
+              typeChat === "group"
                 ? "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
                 : "https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010_960_720.jpg"
             }
-            alt={activeChat === "group" ? "Group Chat" : "John Doe"}
+            alt={typeChat === "group" ? "Group Chat" : "John Doe"}
           />
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-800">
-              {activeChat === "group" ? "Project Team" : "John Doe"}
+              {information.username ? information.username : information.name}
             </h2>
             <p className="text-sm text-gray-600">
-              {activeChat === "group" ? "4 members" : "Online"}
+              {typeChat === "group" ? "4 members" : "Online"}
             </p>
           </div>
         </div>
-        {activeChat === "group" && (
+        {typeChat === "group" && (
           <button
             onClick={toggleGroupInfo}
             className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200"

@@ -5,7 +5,8 @@ type Message = {
 };
 
 type ChatAreaProps = {
-  activeChat: string;
+  activeChat: number;
+  typeChat: string;
   toggleGroupInfo: () => void;
 };
 
