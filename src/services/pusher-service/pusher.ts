@@ -22,9 +22,12 @@ class PusherService {
     if (!this.pusher) {
       throw new Error("Pusher chưa được khởi tạo.");
     }
+    if (this.channel) {
+      this.unsubscribeChannel(); // Unsubscribe nếu đã có channel cũ
+    }
 
-    this.channel = this.pusher.subscribe(channelName);
-    this.channel.bind(eventName, function (data) {
+    this.channel = this.pusher?.subscribe(channelName);
+    this.channel?.bind(eventName, function (data) {
       callback(data);
     });
   }
@@ -32,6 +35,7 @@ class PusherService {
   unsubscribeChannel() {
     if (this.channel) {
       this.pusher?.unsubscribe(this.channel.name);
+      this.channel = null;
     }
   }
 }
