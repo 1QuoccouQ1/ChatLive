@@ -15,4 +15,10 @@ export const registerUser = (user) => fetchAPI("/users/register", "POST", user);
 export const loginUser = (user) => fetchAPI("/users/login", "POST", user);
 
 export const getMembers = () => fetchAPI("/list_members");
-
+export const getAllGroups = () => fetchAPI("/groups");
+export const getSearch = (data) => fetchAPI("/search", "POST", data);
+export const getMessagesGroup = (data) => fetchAPI(`/groups/${data}/messages`);
+export const getMessagesUser = (data) => fetchAPI(`/messages/${data}`);
+export const sendMessagesUser = (data) => fetchAPI(`/send_message`, "POST", data);
+export const sendMessagesGroup = (groupId, data) =>
+  fetchAPI(`/groups/${groupId}/messages`, "POST", data);

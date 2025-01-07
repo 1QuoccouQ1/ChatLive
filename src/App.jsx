@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { GroupInfo } from "./components/GroupInfo";
 import { ChatArea } from "./components/ChatArea";
+import { AddChats } from "./components/AddChats/AddChats";
 
 export default function MessagingApp() {
-  const [activeChat, setActiveChat] = useState("group");
+  const [activeChat, setActiveChat] = useState(1);
+  const [typeChat, setTypeChat] = useState("group");
   const [showGroupInfo, setShowGroupInfo] = useState(false);
 
   const toggleGroupInfo = () => {
@@ -15,9 +17,9 @@ export default function MessagingApp() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar activeChat={activeChat} setActiveChat={setActiveChat} />
+      <Sidebar activeChat={activeChat} setActiveChat={setActiveChat} setTypeChat={setTypeChat} />
       <div className="flex-1">
-        <ChatArea activeChat={activeChat} toggleGroupInfo={toggleGroupInfo} />
+        <ChatArea activeChat={activeChat} typeChat={typeChat} toggleGroupInfo={toggleGroupInfo} />
       </div>
       {showGroupInfo && <GroupInfo onClose={() => setShowGroupInfo(false)} />}
     </div>
