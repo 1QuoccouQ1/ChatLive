@@ -96,16 +96,31 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   };
 
   useEffect(() => {
+    // pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
+
+    // pusherService.subscribeToChannel("my-channel", "my-event", (data) => {
+    //   alert(JSON.stringify(data));
+    // });
+
+    // return () => {
+    //   pusherService.unsubscribeChannel();
+    // };
     pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
 
-    pusherService.subscribeToChannel("my-channel", "my-event", (data) => {
-      alert(JSON.stringify(data));
-    });
+    const channelName =
+    typeChat === 'group' ? `group-${activeChat}` : `user-${activeChat}`;
+  
+    pusherService.subscribeToChannel(channelName, 'my-event', (data) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        ...data
+      ]);
+    }); 
 
     return () => {
       pusherService.unsubscribeChannel();
     };
-  }, []);
+  }, [activeChat , typeChat]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
