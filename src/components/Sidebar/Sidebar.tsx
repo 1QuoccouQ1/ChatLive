@@ -7,6 +7,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   activeChat,
   setActiveChat,
   setTypeChat,
+  toggleAddChats,
 }) => {
   const {
     filteredChats,
@@ -33,6 +34,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+          <MessageCirclePlus
+            className="cursor-pointer"
+            onClick={toggleAddChats}
+          />
         </div>
         <div className="overflow-y-auto h-[calc(100vh-5rem)]">
           <h2 className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">

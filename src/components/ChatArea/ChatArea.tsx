@@ -1,127 +1,25 @@
-import { useState, useEffect, useRef } from "react";
 import { Smile, Paperclip, Send, MoreVertical } from "lucide-react";
 import React from "react";
-import { ChatAreaProps, Message } from "./type";
-import pusherService from "../../services/pusher-service/pusher";
-import {
-  getMessagesGroup,
-  getMessagesUser,
-  sendMessagesGroup,
-  sendMessagesUser,
-} from "../../services/api-service/api-service";
+import { ChatAreaProps } from "./type";
 import { TDataSideBar } from "../Sidebar/type";
+import { useChatArea } from "./hook";
 
 const ChatArea: React.FC<ChatAreaProps> = ({
   activeChat,
   typeChat,
   toggleGroupInfo,
+  setInformationGroup,
 }) => {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [information, setInformation] = useState<TDataSideBar>(Object);
-
-  useEffect(() => {
-    fetchMessages();
-  }, [activeChat, typeChat]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const fetchMessages = async () => {
-    setIsLoading(true);
-    setError(null);
-    if (typeChat == "group") {
-      try {
-        const response = await getMessagesGroup(activeChat);
-        setInformation(response.information);
-        setMessages(response.messages);
-      } catch (err) {
-        setError("Failed to load messages. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else if (typeChat == "user") {
-      try {
-        const response = await getMessagesUser(activeChat);
-        setInformation(response.information);
-        setMessages(response.messages);
-      } catch (err) {
-        setError("Failed to load messages. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (message.trim()) {
-      if (typeChat == "group") {
-        try {
-          const value = {
-            content: message,
-          };
-          const response = await sendMessagesGroup(activeChat, value);
-          setMessages((prevMessages) => [...prevMessages, response.message]);
-          setMessage("");
-        } catch (err) {
-          setError("Failed to load messages. Please try again later.");
-        } finally {
-          setIsLoading(false);
-        }
-      } else if (typeChat == "user") {
-        try {
-          const value = {
-            receiver_id: activeChat,
-            content: message,
-          };
-          const response = await sendMessagesUser(value);
-          setMessages((prevMessages) => [...prevMessages, response.message]);
-          setMessage("");
-        } catch (err) {
-          setError("Failed to load messages. Please try again later.");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    // pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
-
-    // pusherService.subscribeToChannel("my-channel", "my-event", (data) => {
-    //   alert(JSON.stringify(data));
-    // });
-
-    // return () => {
-    //   pusherService.unsubscribeChannel();
-    // };
-    pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
-
-    const channelName =
-    typeChat === 'group' ? `group-${activeChat}` : `user-${activeChat}`;
-  
-    pusherService.subscribeToChannel(channelName, 'my-event', (data) => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        ...data
-      ]);
-    }); 
-
-    return () => {
-      pusherService.unsubscribeChannel();
-    };
-  }, [activeChat , typeChat]);
-
+  const {
+    information,
+    isLoading,
+    error,
+    messages,
+    messagesEndRef,
+    handleSendMessage,
+    message,
+    setMessage,
+  } = useChatArea(activeChat, typeChat, setInformationGroup);
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
@@ -140,7 +38,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
               {information.username ? information.username : information.name}
             </h2>
             <p className="text-sm text-gray-600">
-              {typeChat === "group" ? "4 members" : "Online"}
+              {typeChat === "group" ? `${information.members?.length} members` : "Online"}
             </p>
           </div>
         </div>
@@ -165,25 +63,38 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${
-                  msg.sender === "You" ? "justify-end" : "justify-start"
-                }`}
-              >
+            {messages &&
+              messages.map((msg: TDataSideBar, index) => (
                 <div
-                  className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-lg ${
-                    msg.sender === "You"
-                      ? "bg-blue-500 text-white"
-                      : "bg-white text-gray-800"
+                  key={index}
+                  className={`flex items-center ${
+                    msg.sender_id ===
+                    JSON.parse(localStorage.getItem("user") as string).id
+                      ? "justify-start flex-row-reverse	"
+                      : "justify-start "
                   }`}
                 >
-                  <p className="font-semibold mb-1">{msg.sender}</p>
-                  <p>{msg.content}</p>
+                  <img
+                    className="w-12 h-12 rounded-full object-cover"
+                    src="https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010_960_720.jpg"
+                  />
+                  <div
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 h-[48px] flex flex-col justify-center  rounded-lg mx-2 ${
+                      msg.sender === "You"
+                        ? "bg-blue-500 text-white"
+                        : "bg-white text-gray-800"
+                    }`}
+                  >
+                    {typeChat == "group" && (
+                      <p className="font-semibold mb-1 text-base		">
+                        {msg.sender_username}
+                      </p>
+                    )}
+
+                    <p className=" text-sm">{msg.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
             <div ref={messagesEndRef} />
           </div>
         )}
