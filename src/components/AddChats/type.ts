@@ -2,4 +2,23 @@ type AddChatsProps = {
   onClose: () => void;
 };
 
-export { AddChatsProps };
+type TUserSearch = {
+  id: number;
+  username: string;
+  email: string;
+};
+type THookAddChats = {
+  groupName: string;
+  setGroupName: React.Dispatch<React.SetStateAction<string>>;
+  isPrivate: boolean;
+  setIsPrivate: React.Dispatch<React.SetStateAction<boolean>>;
+  searchTerm: string;
+  handleSearch: (term: string) => void;
+  searchResults: TUserSearch[];
+  addMember: (member: TUserSearch) => void;
+  selectedMembers: TUserSearch[];
+  removeMember: (id: number) => void;
+  createGroup: () => void;
+};
+
+export { AddChatsProps, TUserSearch, THookAddChats };

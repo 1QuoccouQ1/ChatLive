@@ -4,6 +4,10 @@ type SidebarProps = {
   setTypeChat: (chat: string) => void;
   toggleAddChats: () => void;
 };
+type TMembers = {
+  id: string;
+  username: string;
+};
 type THookSideBar = {
   filteredChats: TDataSideBar[];
   listSearchs: TDataSideBar[];
@@ -20,6 +24,11 @@ type TDataSideBar = {
   name?: string;
   created_at?: string;
   updated_at?: string;
+  content?: string;
+  sender?: string;
+  sender_username?: string;
+  sender_id?: string;
+  members?: TMembers[];
 };
 
 export { SidebarProps, THookSideBar, TDataSideBar };
