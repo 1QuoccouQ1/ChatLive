@@ -5,7 +5,14 @@ type AddChatsProps = {
 type TUserSearch = {
   id: number;
   username: string;
+  avatar: string;
   email: string;
+  pivot: TPivot;
+};
+type TPivot = {
+  group_id: string;
+  user_id: string;
+  role: string;
 };
 type THookAddChats = {
   groupName: string;

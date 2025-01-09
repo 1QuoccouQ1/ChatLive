@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import { getSearch } from "../../services/api-service/api-service";
+import { useEffect, useRef, useState } from "react";
+import {
+  checkUpdateMessages,
+  getSearch,
+} from "../../services/api-service/api-service";
 import { TDataSideBar, THookSideBar } from "./type";
-import Pusher from "pusher-js";
 import pusherService from "../../services/pusher-service/pusher";
 
 export const useSidebar = (): THookSideBar => {
@@ -13,18 +15,60 @@ export const useSidebar = (): THookSideBar => {
   });
   const [listSearchs, setListSearchs] = useState<TDataSideBar[]>([]);
   const value = JSON.parse(localStorage.getItem("HistoryChats") as string);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchResultsRef = useRef<HTMLUListElement>(null);
+
+  /**
+   * Handle Search Change
+   * @param e: React.ChangeEvent<HTMLInputElement>
+   */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (e.target.value) {
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
+  };
+
+  /**
+   * Handle Search Focus
+   */
+  const handleSearchFocus = () => {
+    if (searchQuery && listSearchs.length > 0) {
+      setShowSearchResults(true);
+    }
+  };
 
   /**
    * Handle fetch Search API
    */
   const fetchSearch = async () => {
-    const value = {
-      key: searchQuery,
-    };
+    if (searchQuery !== "") {
+      const value = {
+        key: searchQuery,
+      };
+      try {
+        const response = await getSearch(value);
+        if (response?.status == 200) {
+          setListSearchs(response.data);
+        }
+      } catch (err) {}
+    }
+  };
+
+  /**
+   * Handle Check Update Messages
+   */
+  const handleCheckUpdateMessages = async () => {
     try {
-      const response = await getSearch(value);
-      if (response) {
-        setListSearchs(response);
+      const response = await checkUpdateMessages({
+        data: value,
+      });
+      if (response?.status == 200) {
+        setListChats(response.data);
+        localStorage.setItem("HistoryChats", JSON.stringify(response.data));
       }
     } catch (err) {}
   };
@@ -42,58 +86,48 @@ export const useSidebar = (): THookSideBar => {
       );
       if (found) return;
       const newValue = [...value, item];
+      setListChats(newValue);
       localStorage.setItem("HistoryChats", JSON.stringify(newValue));
     } else {
       localStorage.setItem("HistoryChats", JSON.stringify([item]));
     }
   };
 
-  // const filteredChats =
-  //   listChats.length > 0
-  //     ? listChats.filter(
-  //         (chat) =>
-  //           chat.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //           chat.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  //       )
-  //     : [];
-
   useEffect(() => {
     fetchSearch();
   }, [searchQuery]);
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node) &&
+        searchResultsRef.current &&
+        !searchResultsRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
 
     pusherService.subscribeToChannel("public-chat", "my-event", (data) => {
-      setListChats((prevChats) => {
-        const existingChatIndex = prevChats.findIndex(
-          (chat) =>
-            (chat.username === data.sender_username || chat.name === data.group_name)
-        );
-
-        if (existingChatIndex !== -1) {
-          const updatedChats = [...prevChats];
-          updatedChats[existingChatIndex].latest_message = data.message;
-          return updatedChats;
-        }
-
-        const newChat = {
-          id: data.sender_id || data.group_id,
-          username: data.sender_username || data.group_name,
-          latest_message: data.message,
-        };
-        const updatedChats = [newChat, ...prevChats];
-
-        localStorage.setItem("HistoryChats", JSON.stringify(updatedChats));
-        return updatedChats;
-      });
+      handleCheckUpdateMessages();
     });
 
     return () => {
-      pusherService.unsubscribeChannel();
+      pusherService.unsubscribeChannel("public-chat");
     };
-  }, [searchQuery]);
-  
+  },[]);
+
   return {
     listChats,
     setSearchQuery,
@@ -102,5 +136,11 @@ export const useSidebar = (): THookSideBar => {
     handleSelectedChat,
     currentIndex,
     setCurrentIndex,
+    searchInputRef,
+    handleSearchChange,
+    handleSearchFocus,
+    showSearchResults,
+    searchResultsRef,
+    setShowSearchResults,
   };
 };

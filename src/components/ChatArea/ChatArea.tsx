@@ -19,36 +19,13 @@ const ChatArea: React.FC<ChatAreaProps> = ({
     handleSendMessage,
     message,
     setMessage,
+    selectedFiles,
+    handleRemoveFile,
+    handleSendMessageWithFile,
+    setIsEmojiPickerVisible,
+    handleFileChange,
+    isEmojiPickerVisible,
   } = useChatArea(activeChat, typeChat, setInformationGroup);
-
-  const [isEmojiPickerVisible, setIsEmojiPickerVisible] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);  // Sử dụng mảng để lưu nhiều file
-
-  const handleEmojiSelect = (emoji) => {
-    setMessage(prevMessage => prevMessage + emoji.native); // Thêm emoji vào message
-    setIsEmojiPickerVisible(false);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setSelectedFiles(prevFiles => [...prevFiles, ...Array.from(files)]); // Thêm các file mới vào danh sách
-    }
-  };
-
-  const handleRemoveFile = (fileToRemove: File) => {
-    setSelectedFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove)); // Xóa file khỏi danh sách
-  };
-
-  const handleSendMessageWithFile = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedFiles.length > 0) {
-      // Gửi file lên server hoặc xử lý gửi file với tin nhắn
-      console.log(selectedFiles);
-      setSelectedFiles([]); // Reset danh sách file sau khi gửi
-    }
-    handleSendMessage(e); // Gửi tin nhắn văn bản
-  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -56,19 +33,17 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         <div className="flex items-center">
           <img
             className="w-10 h-10 rounded-full object-cover"
-            src={
-              typeChat === "group"
-                ? "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
-                : "https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010_960_720.jpg"
-            }
-            alt={typeChat === "group" ? "Group Chat" : "John Doe"}
+            src={information.avatar}
+            alt={typeChat === "group" ? "Group Chat" : "User Chat"}
           />
           <div className="ml-3">
             <h2 className="text-lg font-semibold text-gray-800">
               {information.username ? information.username : information.name}
             </h2>
             <p className="text-sm text-gray-600">
-              {typeChat === "group" ? `${information.members?.length} members` : "Online"}
+              {typeChat === "group"
+                ? `${information.members?.length} members`
+                : "Online"}
             </p>
           </div>
         </div>
@@ -107,10 +82,10 @@ const ChatArea: React.FC<ChatAreaProps> = ({
                 >
                   <img
                     className="w-12 h-12 rounded-full object-cover"
-                    src="https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010_960_720.jpg"
+                    src={msg.avatar}
                   />
                   <div
-                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 h-[48px] flex flex-col justify-center rounded-lg mx-2 ${
+                    className={`max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl px-4 min-h-[48px] flex flex-col justify-center rounded-lg mx-2 ${
                       msg.sender === "You"
                         ? "bg-blue-500 text-white"
                         : "bg-white text-gray-800"
@@ -130,18 +105,19 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         )}
       </div>
 
-      {/* Hiển thị các file đã chọn ở trên đầu */}
       {selectedFiles.length > 0 && (
-        <div className="p-4 bg-gray-200 border-t border-gray-300">
-          <h4 className="font-semibold text-gray-800">Selected Files:</h4>
+        <div className="px-4 py-2 bg-gray-200 border-t border-gray-300">
           <ul>
             {selectedFiles.map((file, index) => (
-              <li key={index} className="text-gray-600 flex justify-between items-center">
-                <span>{file.name}</span>
+              <li
+                key={index}
+                className="text-gray-600 flex justify-between items-center my-1"
+              >
+                <span className="text-sm">{file.name}</span>
                 <button
                   type="button"
-                  className="text-red-500 hover:text-red-700 ml-2"
-                  onClick={() => handleRemoveFile(file)}  // Xóa file khi nhấn vào nút
+                  className="text-red-500 hover:text-red-700 ml-2 text-xs py-1 px-3 outline-0"
+                  onClick={() => handleRemoveFile(file)}
                 >
                   Xóa
                 </button>
@@ -164,15 +140,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           >
             <Smile className="w-6 h-6" />
           </button>
-          <button
-            type="button"
-            className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
-            aria-label="Attach file"
-          >
-            <Paperclip className="w-6 h-6" />
-          </button>
 
-          {/* Cho phép chọn nhiều file */}
           <input
             type="file"
             multiple

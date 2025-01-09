@@ -9,13 +9,62 @@ import {
 } from "../../services/api-service/api-service";
 import pusherService from "../../services/pusher-service/pusher";
 
-export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookChatArea => {
+export const useChatArea = (
+  activeChat,
+  typeChat,
+  setInformationGroup
+): THookChatArea => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [information, setInformation] = useState<TDataSideBar>(Object);
+  const [isEmojiPickerVisible, setIsEmojiPickerVisible] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  /**
+   * Handle Emoji Select
+   * @param emoji
+   */
+  const handleEmojiSelect = (emoji) => {
+    setMessage((prevMessage) => prevMessage + emoji.native);
+    setIsEmojiPickerVisible(false);
+  };
+
+  /**
+   * Handle File Change
+   * @param e: React.ChangeEvent<HTMLInputElement>
+   */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setSelectedFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
+    }
+  };
+
+  /**
+   * Handle Remove File
+   * @param fileToRemove: File
+   */
+  const handleRemoveFile = (fileToRemove: File) => {
+    setSelectedFiles((prevFiles) =>
+      prevFiles.filter((file) => file !== fileToRemove)
+    );
+  };
+
+  /**
+   * Handle Send Message With File
+   * @param e: React.FormEvent
+   */
+  const handleSendMessageWithFile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedFiles.length > 0) {
+      console.log(selectedFiles);
+      setSelectedFiles([]);
+    }
+    handleSendMessage(e);
+  };
 
   /**
    * Handle scroll To Bottom
@@ -33,9 +82,11 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
     if (typeChat == "group") {
       try {
         const response = await getMessagesGroup(activeChat);
-        setInformation(response.information);
-        setInformationGroup(response.information);
-        setMessages(response.messages);
+        if (response?.status == 200) {
+          setInformation(response.data.information);
+          setInformationGroup(response.data.information);
+          setMessages(response.data.messages);
+        }
       } catch (err) {
         setError("Failed to load messages. Please try again later.");
       } finally {
@@ -44,8 +95,10 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
     } else if (typeChat == "user") {
       try {
         const response = await getMessagesUser(activeChat);
-        setInformation(response.information);
-        setMessages(response.messages);
+        if (response?.status == 200) {
+          setInformation(response.data.information);
+          setMessages(response.data.messages);
+        }
       } catch (err) {
         setError("Failed to load messages. Please try again later.");
       } finally {
@@ -67,7 +120,9 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
             content: message,
           };
           const response = await sendMessagesGroup(activeChat, value);
-          setMessage("");
+          if (response?.status == 200) {
+            setMessage("");
+          } else setError("Failed to send messages. Please try again later.");
         } catch (err) {
           setError("Failed to load messages. Please try again later.");
         } finally {
@@ -80,7 +135,10 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
             content: message,
           };
           const response = await sendMessagesUser(value);
-          setMessages((prevMessages) => [...prevMessages, response.message]);
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            response?.data.message,
+          ]);
           setMessage("");
         } catch (err) {
           setError("Failed to load messages. Please try again later.");
@@ -106,7 +164,7 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
       });
 
       return () => {
-        pusherService.unsubscribeChannel();
+        pusherService.unsubscribeChannel(channelName);
       };
     } else {
       const channelName = `user-${
@@ -124,7 +182,7 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
       });
 
       return () => {
-        pusherService.unsubscribeChannel();
+        pusherService.unsubscribeChannel(channelName);
       };
     }
   }, [activeChat, typeChat]);
@@ -146,5 +204,11 @@ export const useChatArea = (activeChat, typeChat ,setInformationGroup): THookCha
     handleSendMessage,
     message,
     setMessage,
+    selectedFiles,
+    handleRemoveFile,
+    handleSendMessageWithFile,
+    setIsEmojiPickerVisible,
+    handleFileChange,
+    isEmojiPickerVisible,
   };
 };

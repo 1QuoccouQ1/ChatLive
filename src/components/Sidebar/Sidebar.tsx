@@ -17,46 +17,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     handleSelectedChat,
     currentIndex,
     setCurrentIndex,
+    searchInputRef,
+    handleSearchChange,
+    handleSearchFocus,
+    showSearchResults,
+    searchResultsRef,
+    setShowSearchResults,
   } = useSidebar();
-
-  const [showSearchResults, setShowSearchResults] = useState(false);
-
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchResultsRef = useRef<HTMLUListElement>(null);
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    if (e.target.value) {
-      setShowSearchResults(true);
-    } else {
-      setShowSearchResults(false);
-    }
-  };
-
-  const handleSearchFocus = () => {
-    if (searchQuery && listSearchs.length > 0) {
-      setShowSearchResults(true); 
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchInputRef.current &&
-        !searchInputRef.current.contains(event.target as Node) &&
-        searchResultsRef.current &&
-        !searchResultsRef.current.contains(event.target as Node)
-      ) {
-        setShowSearchResults(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <>
@@ -73,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               placeholder="Search chats"
               value={searchQuery}
               onChange={handleSearchChange}
-              onFocus={handleSearchFocus} 
+              onFocus={handleSearchFocus}
             />
             {showSearchResults && searchQuery && listSearchs.length > 0 && (
               <ul
@@ -90,14 +57,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                       if (searchItem.name) {
                         setTypeChat("group");
                       } else setTypeChat("user");
-                      setSearchQuery(""); 
-                      setShowSearchResults(false); 
+                      setSearchQuery("");
+                      setShowSearchResults(false);
                     }}
                   >
                     <div className="flex items-center gap-3">
                       <img
                         className="w-8 h-8 rounded-full object-cover"
-                        src="https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
+                        src={searchItem.avatar}
                         alt={searchItem.username || searchItem.name}
                       />
                       <div>
@@ -126,11 +93,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           <ul>
             {listChats.map((chat, index) => (
               <li key={index}>
-                <button
-                  className={`w-full flex items-center outline-0 px-4 py-3 text-left transition duration-150 ease-in-out ${
-                    currentIndex === index
-                      ? "bg-blue-100"
-                      : "hover:bg-gray-200"
+                <div
+                  className={`w-full flex items-center outline-0 px-4 py-3 text-left transition duration-150 ease-in-out cursor-pointer ${
+                    currentIndex === index ? "bg-blue-100" : "hover:bg-gray-200"
                   }`}
                   onClick={() => {
                     setCurrentIndex(index);
@@ -143,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 >
                   <img
                     className="w-12 h-12 rounded-full object-cover"
-                    src="https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
+                    src={chat.avatar}
                     alt={chat.username}
                   />
                   <div className="ml-4 flex-1">
@@ -157,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       {chat.latest_message}
                     </p>
                   </div>
-                </button>
+                </div>
               </li>
             ))}
           </ul>
