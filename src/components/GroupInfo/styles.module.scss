@@ -1,0 +1,163 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(17, 24, 39, 0.5);
+    overflow: hidden;
+  }
+  
+  .modal {
+    background-color: white;
+    width: 100%;
+    max-width: 24rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .closeButton {
+    color: #6b7280;
+    transition: color 0.2s;
+  }
+  
+  .closeButton:hover {
+    color: #374151;
+  }
+  
+  .content {
+    padding: 1rem;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #374151;
+  }
+  
+  .membersList,
+  .searchResultsList,
+  .filesList {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .membersList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .memberItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+  
+  .memberInfo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    margin-right: 0.75rem;
+    border: 2px solid white;
+  }
+  
+  .memberName {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .memberAction {
+    cursor: pointer;
+  }
+  
+  .searchInput {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  
+  .searchItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .searchItem:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .fileItem {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+  }
+  
+  .fileIcon {
+    height: 1.25rem;
+    width: 1.25rem;
+    margin-right: 0.5rem;
+    color: #3b82f6;
+  }
+  
+  .fileName {
+    font-size: 0.875rem;
+    color: #374151;
+  }
+  
+  .deleteButton {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    text-align: center;
+  }
+  
+  .deleteButton:hover {
+    background-color: #dc2626;
+  }
+  

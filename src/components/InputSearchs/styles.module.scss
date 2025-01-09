@@ -1,0 +1,33 @@
+
+.searchIcon {
+    cursor: pointer;
+  }
+  
+  .inputField {
+    border: none;
+    margin: 0 0.5rem;
+    width: 100%;
+    max-width: 350px;
+    background: transparent;
+    color: white;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    
+    &:focus {
+      outline: none;
+      ring: 2px solid #3B82F6;
+    }
+    
+    &::placeholder {
+      color: #6B7280; 
+    }
+  }
+  
+  .inputWrapper {
+    position: relative;
+  }
+  
+  .inputWrapper .inputField {
+    margin-left: 2rem; 
+  }
+  

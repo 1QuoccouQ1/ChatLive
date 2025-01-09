@@ -10,11 +10,11 @@ export default function MessagingApp() {
   const historyChats = JSON.parse(localStorage.getItem("HistoryChats"));
   const [activeChat, setActiveChat] = useState(() => {
     const value = localStorage.getItem("activeChat");
-    return value ? value : historyChats[0].id;
+    return value ? value :  historyChats ? historyChats[0].id : 1;
   });
   const [typeChat, setTypeChat] = useState(() => {
     const value = localStorage.getItem("typeChat");
-    return value ? value : historyChats[0].type;
+    return value ? value : historyChats ? historyChats[0].type : "typeChat";
   });
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [showAddChats, setShowAddChats] = useState(false);
