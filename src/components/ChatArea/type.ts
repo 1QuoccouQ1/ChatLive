@@ -22,6 +22,12 @@ type THookChatArea = {
   handleSendMessage: (e: React.FormEvent) => void;
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
+  selectedFiles: File[];
+  handleRemoveFile: (fileToRemove: File) => void;
+  handleSendMessageWithFile: (e: React.FormEvent) => void;
+  setIsEmojiPickerVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isEmojiPickerVisible: boolean;
 };
 
 export { Message, ChatAreaProps, THookChatArea };

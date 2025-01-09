@@ -7,6 +7,12 @@ type SidebarProps = {
 type TMembers = {
   id: string;
   username: string;
+  pivot: TPivot;
+};
+type TPivot = {
+  group_id: string;
+  user_id: string;
+  role: string;
 };
 type THookSideBar = {
   listChats: TDataSideBar[];
@@ -16,6 +22,12 @@ type THookSideBar = {
   handleSelectedChat: (item: TDataSideBar) => void;
   currentIndex: number;
   setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
+  searchInputRef: React.RefObject<HTMLInputElement>;
+  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSearchFocus: () => void;
+  showSearchResults: boolean;
+  searchResultsRef: React.RefObject<HTMLUListElement>;
+  setShowSearchResults: React.Dispatch<React.SetStateAction<boolean>>;
 };
 type TDataSideBar = {
   id: number;
@@ -29,6 +41,7 @@ type TDataSideBar = {
   sender_username?: string;
   sender_id?: string;
   latest_message?: string;
+  avatar?: string;
   members?: TMembers[];
 };
 

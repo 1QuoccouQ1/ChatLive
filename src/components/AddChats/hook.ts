@@ -14,7 +14,7 @@ export const useAddChats = (onClose): THookAddChats => {
 
   /**
    * handle Search
-   * @param term: string 
+   * @param term: string
    */
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
@@ -23,7 +23,9 @@ export const useAddChats = (onClose): THookAddChats => {
         const response = await getSearchUser({
           key: searchTerm,
         });
-        setSearchResults(response);
+        if (response?.status == 200) {
+          setSearchResults(response.data);
+        }
       } catch (error) {
         console.error("Error searching users:", error);
       }
@@ -34,7 +36,7 @@ export const useAddChats = (onClose): THookAddChats => {
 
   /**
    * handle add Member
-   * @param member: TUserSearch 
+   * @param member: TUserSearch
    */
   const addMember = (member: TUserSearch) => {
     if (!selectedMembers.find((m) => m.id === member.id)) {
@@ -44,7 +46,7 @@ export const useAddChats = (onClose): THookAddChats => {
 
   /**
    * handle remove Member
-   * @param id: number 
+   * @param id: number
    */
   const removeMember = (id: number) => {
     setSelectedMembers(selectedMembers.filter((m) => m.id !== id));
@@ -64,7 +66,7 @@ export const useAddChats = (onClose): THookAddChats => {
 
     try {
       const response = await createGroupApi(groupData);
-      alert("Group created successfully!");
+      if (response?.status == 200) alert("Group created successfully!");
       onClose();
     } catch (error) {
       console.error("Error creating group:", error);

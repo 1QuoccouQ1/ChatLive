@@ -2,43 +2,37 @@ import Pusher, { Channel } from "pusher-js";
 
 class PusherService {
   private pusher: Pusher | null = null;
-  private channel: Channel | null = null;
+  private channels: { [key: string]: Channel } = {}; 
 
   constructor() {
     this.pusher = null;
-    this.channel = null;
+    this.channels = {}; 
   }
 
-  initPusher(key, cluster) {
+  initPusher(appKey: string, cluster: string) {
     if (!this.pusher) {
-      this.pusher = new Pusher(key, {
+      this.pusher = new Pusher(appKey, {
         cluster: cluster,
-        forceTLS: true,
       });
     }
   }
 
-  subscribeToChannel(channelName, eventName, callback) {
-    if (!this.pusher) {
-      throw new Error("Pusher chưa được khởi tạo.");
+  subscribeToChannel(channelName: string, eventName: string, callback: (data: any) => void) {
+    if (!this.channels[channelName]) {
+      this.channels[channelName] = this.pusher?.subscribe(channelName) as Channel; // Lưu Channel vào object
     }
-    if (this.channel) {
-      this.unsubscribeChannel(); // Unsubscribe nếu đã có channel cũ
-    }
-
-    this.channel = this.pusher?.subscribe(channelName);
-    this.channel?.bind(eventName, function (data) {
-      callback(data);
-    });
+    this.channels[channelName].bind(eventName, callback);
   }
 
-  unsubscribeChannel() {
-    if (this.channel) {
-      this.pusher?.unsubscribe(this.channel.name);
-      this.channel = null;
+  unsubscribeChannel(channelName: string) {
+    if (this.channels[channelName]) {
+      this.channels[channelName].unbind_all();
+      this.pusher?.unsubscribe(channelName);
+      delete this.channels[channelName]; 
     }
   }
 }
 
 const pusherService = new PusherService();
 export default pusherService;
+

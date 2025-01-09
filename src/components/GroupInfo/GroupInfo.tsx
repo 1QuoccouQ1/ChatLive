@@ -1,92 +1,18 @@
 import { FileText, PlusCircle, PlusCircleIcon, X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { GroupInfoProps } from "./type";
-import {
-  addMemberToGroup,
-  delGroup,
-  delMemberToGroup,
-  getSearchUser,
-} from "../../services/api-service/api-service";
-import { TUserSearch } from "../AddChats/type";
+import { useGroupInfo } from "./hook";
 
 const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
-  const [listMembers, setListMembers] = useState<TUserSearch[]>(
-    informationGroup.members as []
-  );
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<TUserSearch[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<TUserSearch[]>([]);
-
-  /**
-   * handle Search
-   * @param term: string
-   */
-  const handleSearch = async (term: string) => {
-    setSearchTerm(term);
-    if (term.length > 0) {
-      try {
-        const response = await getSearchUser({
-          group: informationGroup.id,
-          key: searchTerm,
-        });
-        setSearchResults(response);
-      } catch (error) {}
-    } else {
-      setSearchResults([]);
-    }
-  };
-
-  /**
-   * handle add Member
-   * @param member: TUserSearch
-   */
-  const addMember = async (member: TUserSearch) => {
-    if (!selectedMembers.find((m) => m.id === member.id)) {
-      try {
-        const response = await addMemberToGroup(informationGroup.id, {
-          user_id: member.id,
-        });
-        setSelectedMembers([...selectedMembers, member]);
-        setListMembers((prevList) => [...(prevList || []), member]);
-      } catch (error) {
-        console.error("Error searching users:", error);
-      }
-    }
-  };
-
-  /**
-   * handle remove Member
-   * @param id: number
-   */
-  const removeMember = async (id: number) => {
-    try {
-      const response = await delMemberToGroup(informationGroup.id, id);
-      if (response) {
-        setSelectedMembers(selectedMembers.filter((m) => m.id !== id));
-        setListMembers(listMembers.filter((m) => m.id !== id));
-      }
-    } catch (error) {
-      console.error("Error searching users:", error);
-    }
-  };
-
-  /**
-   * handle Delete Group
-   */
-  const handleDeleteGroup = async () => {
-    const isConfirmed = window.confirm(
-      "Bạn có chắc chắn muốn xóa nhóm này không?"
-    );
-    if (isConfirmed) {
-      try {
-        const response = await delGroup(informationGroup.id);
-        alert(response.message);
-        onClose();
-      } catch (error) {
-        alert("Error deleting group.");
-      }
-    }
-  };
+  const {
+    listMembers,
+    removeMember,
+    searchTerm,
+    handleSearch,
+    searchResults,
+    addMember,
+    handleDeleteGroup,
+  } = useGroupInfo(informationGroup, onClose);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-gray-900 bg-opacity-50 flex items-center justify-center">
@@ -112,12 +38,12 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
                 listMembers.map((member, index) => (
                   <li
                     key={index}
-                    className="flex items-center justify-between bg-gray-100 rounded-lg p-2"
+                    className="flex items-center justify-between bg-gray-100 rounded-lg p-2 relative"
                   >
                     <div className="flex items-center">
                       <img
                         className="w-10 h-10 rounded-full mr-3 border-2 border-white"
-                        src="https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
+                        src={member.avatar}
                         alt={member.username}
                       />
                       <span className="text-sm font-medium text-gray-700">
@@ -127,6 +53,11 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
                     <div className="flex items-center cursor-pointer">
                       <X size={15} onClick={() => removeMember(member.id)} />
                     </div>
+                    {/* {member.pivot.role &&  member.pivot.role == "admin" && (
+                      <div className="absolute top-1 right-2">
+                        <Crown size={12} color="red" />
+                      </div>
+                    )} */}
                   </li>
                 ))}
             </ul>
@@ -143,26 +74,27 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
               onChange={(e) => handleSearch(e.target.value)}
             />
             <ul className="grid grid-cols-1 gap-2">
-              {searchResults.map((user) => (
-                <li
-                  key={user.id}
-                  className="flex items-center px-3 justify-between bg-gray-100 rounded-lg p-2 cursor-pointer hover:bg-gray-200"
-                >
-                  <div className="flex items-center">
-                    <img
-                      className="w-10 h-10 rounded-full mr-3 border-2 border-white"
-                      src="https://cdn.pixabay.com/photo/2018/09/12/12/14/man-3672010_960_720.jpg"
-                      alt={user.username}
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      {user.username}
-                    </span>
-                  </div>
-                  <div>
-                    <PlusCircle onClick={() => addMember(user)} />
-                  </div>
-                </li>
-              ))}
+              {searchResults &&
+                searchResults.map((user) => (
+                  <li
+                    key={user.id}
+                    className="flex items-center px-3 justify-between bg-gray-100 rounded-lg p-2 cursor-pointer hover:bg-gray-200"
+                  >
+                    <div className="flex items-center">
+                      <img
+                        className="w-10 h-10 rounded-full mr-3 border-2 border-white"
+                        src={user.avatar}
+                        alt={user.username}
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        {user.username}
+                      </span>
+                    </div>
+                    <div>
+                      <PlusCircle onClick={() => addMember(user)} />
+                    </div>
+                  </li>
+                ))}
             </ul>
           </div>
           <div>

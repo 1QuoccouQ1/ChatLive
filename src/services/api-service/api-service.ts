@@ -15,13 +15,13 @@ async function axiosAPI(endpoint, method = "GET", body = null) {
     const response = await axiosInstance({
       url: endpoint,
       method,
-      data: body, 
+      data: body,
     });
-    return response.data; 
-  } catch (error) {
-    console.error("Error:", error.response ? error.response.data : error.message);
-    throw error;
-  }
+    return {
+      data: response.data,
+      status: response.status,
+    };
+  } catch (error) {}
 }
 
 export const registerUser = (user) => axiosAPI("/users/register", "POST", user);
@@ -34,7 +34,10 @@ export const getSearch = (data) => axiosAPI("/search", "POST", data);
 export const getSearchUser = (data) => axiosAPI("/searchUser", "POST", data);
 export const getMessagesGroup = (data) => axiosAPI(`/groups/${data}/messages`);
 export const getMessagesUser = (data) => axiosAPI(`/messages/${data}`);
-export const sendMessagesUser = (data) => axiosAPI(`/send_message`, "POST", data);
+export const sendMessagesUser = (data) =>
+  axiosAPI(`/send_message`, "POST", data);
+export const checkUpdateMessages = (data) =>
+  axiosAPI(`/checkUpdate`, "POST", data);
 export const sendMessagesGroup = (groupId, data) =>
   axiosAPI(`/groups/${groupId}/messages`, "POST", data);
 export const delMemberToGroup = (groupId, userId) =>
