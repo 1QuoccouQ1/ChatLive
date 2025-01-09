@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { getSearch } from "../../services/api-service/api-service";
 import { TDataSideBar, THookSideBar } from "./type";
+import Pusher from "pusher-js";
+import pusherService from "../../services/pusher-service/pusher";
 
 export const useSidebar = (): THookSideBar => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,21 +48,54 @@ export const useSidebar = (): THookSideBar => {
     }
   };
 
-  const filteredChats =
-    listChats.length > 0
-      ? listChats.filter(
-          (chat) =>
-            chat.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            chat.name?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : [];
+  // const filteredChats =
+  //   listChats.length > 0
+  //     ? listChats.filter(
+  //         (chat) =>
+  //           chat.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //           chat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  //       )
+  //     : [];
 
   useEffect(() => {
     fetchSearch();
   }, [searchQuery]);
 
+  useEffect(() => {
+    pusherService.initPusher("c47e12db7c7164bcc7db", "ap1");
+
+    pusherService.subscribeToChannel("public-chat", "my-event", (data) => {
+      setListChats((prevChats) => {
+        const existingChatIndex = prevChats.findIndex(
+          (chat) =>
+            (chat.username === data.sender_username || chat.name === data.group_name)
+        );
+
+        if (existingChatIndex !== -1) {
+          const updatedChats = [...prevChats];
+          updatedChats[existingChatIndex].latest_message = data.message;
+          return updatedChats;
+        }
+
+        const newChat = {
+          id: data.sender_id || data.group_id,
+          username: data.sender_username || data.group_name,
+          latest_message: data.message,
+        };
+        const updatedChats = [newChat, ...prevChats];
+
+        localStorage.setItem("HistoryChats", JSON.stringify(updatedChats));
+        return updatedChats;
+      });
+    });
+
+    return () => {
+      pusherService.unsubscribeChannel();
+    };
+  }, [searchQuery]);
+  
   return {
-    filteredChats,
+    listChats,
     setSearchQuery,
     searchQuery,
     listSearchs,

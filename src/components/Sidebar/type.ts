@@ -9,7 +9,7 @@ type TMembers = {
   username: string;
 };
 type THookSideBar = {
-  filteredChats: TDataSideBar[];
+  listChats: TDataSideBar[];
   listSearchs: TDataSideBar[];
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   searchQuery: string;
@@ -28,6 +28,7 @@ type TDataSideBar = {
   sender?: string;
   sender_username?: string;
   sender_id?: string;
+  latest_message?: string;
   members?: TMembers[];
 };
 

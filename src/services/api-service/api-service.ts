@@ -1,31 +1,44 @@
+import axios from "axios";
+
 export const API_URL = "http://localhost:8000/api";
 
-async function fetchAPI(endpoint, method = "GET", body = null) {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + localStorage.getItem("token"),
-    },
-    body: body ? JSON.stringify(body) : null,
-  });
-  return response.json();
-}
-export const registerUser = (user) => fetchAPI("/users/register", "POST", user);
-export const loginUser = (user) => fetchAPI("/users/login", "POST", user);
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + localStorage.getItem("token"),
+  },
+});
 
-export const getMembers = () => fetchAPI("/list_members");
-export const getAllGroups = () => fetchAPI("/groups");
-export const createGroupApi = (data) => fetchAPI("/create_group", "POST", data);
-export const getSearch = (data) => fetchAPI("/search", "POST", data);
-export const getSearchUser = (data) => fetchAPI("/searchUser", "POST", data);
-export const getMessagesGroup = (data) => fetchAPI(`/groups/${data}/messages`);
-export const getMessagesUser = (data) => fetchAPI(`/messages/${data}`);
-export const sendMessagesUser = (data) =>
-  fetchAPI(`/send_message`, "POST", data);
+async function axiosAPI(endpoint, method = "GET", body = null) {
+  try {
+    const response = await axiosInstance({
+      url: endpoint,
+      method,
+      data: body, 
+    });
+    return response.data; 
+  } catch (error) {
+    console.error("Error:", error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
+export const registerUser = (user) => axiosAPI("/users/register", "POST", user);
+export const loginUser = (user) => axiosAPI("/users/login", "POST", user);
+
+export const getMembers = () => axiosAPI("/list_members");
+export const getAllGroups = () => axiosAPI("/groups");
+export const createGroupApi = (data) => axiosAPI("/create_group", "POST", data);
+export const getSearch = (data) => axiosAPI("/search", "POST", data);
+export const getSearchUser = (data) => axiosAPI("/searchUser", "POST", data);
+export const getMessagesGroup = (data) => axiosAPI(`/groups/${data}/messages`);
+export const getMessagesUser = (data) => axiosAPI(`/messages/${data}`);
+export const sendMessagesUser = (data) => axiosAPI(`/send_message`, "POST", data);
 export const sendMessagesGroup = (groupId, data) =>
-  fetchAPI(`/groups/${groupId}/messages`, "POST", data);
+  axiosAPI(`/groups/${groupId}/messages`, "POST", data);
 export const delMemberToGroup = (groupId, userId) =>
-  fetchAPI(`/groups/${groupId}/members/${userId}`, "DELETE");
+  axiosAPI(`/groups/${groupId}/members/${userId}`, "DELETE");
+export const delGroup = (groupId) => axiosAPI(`/groups/${groupId}`, "DELETE");
 export const addMemberToGroup = (groupId, data) =>
-  fetchAPI(`/groups/${groupId}/add_members`, "POST", data);
+  axiosAPI(`/groups/${groupId}/add_members`, "POST", data);
