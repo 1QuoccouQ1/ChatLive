@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GroupInfoProps } from "./type";
 import {
   addMemberToGroup,
+  delGroup,
   delMemberToGroup,
   getSearchUser,
 } from "../../services/api-service/api-service";
@@ -25,6 +26,7 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
     if (term.length > 0) {
       try {
         const response = await getSearchUser({
+          group: informationGroup.id,
           key: searchTerm,
         });
         setSearchResults(response);
@@ -65,6 +67,24 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
       }
     } catch (error) {
       console.error("Error searching users:", error);
+    }
+  };
+
+  /**
+   * handle Delete Group
+   */
+  const handleDeleteGroup = async () => {
+    const isConfirmed = window.confirm(
+      "Bạn có chắc chắn muốn xóa nhóm này không?"
+    );
+    if (isConfirmed) {
+      try {
+        const response = await delGroup(informationGroup.id);
+        alert(response.message);
+        onClose();
+      } catch (error) {
+        alert("Error deleting group.");
+      }
     }
   };
 
@@ -160,6 +180,14 @@ const GroupInfo: React.FC<GroupInfoProps> = ({ onClose, informationGroup }) => {
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="mt-6">
+            <button
+              onClick={handleDeleteGroup}
+              className="w-full py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Delete Group
+            </button>
           </div>
         </div>
       </div>
