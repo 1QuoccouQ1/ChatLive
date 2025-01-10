@@ -1,0 +1,131 @@
+.sidebar {
+    max-width: 350px;
+    min-width: 300px;
+    height: 100vh;
+    background-color: #f3f4f6;
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .sidebarSearch {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+  }
+  
+  .searchInputWrapper {
+    width: 100%;
+    position: relative;
+  }
+  
+  .searchIcon {
+    position: absolute;
+    inset-y: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 0.75rem;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding-left: 2.5rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    background-color: white;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .searchInput:focus {
+    outline: 2px solid #3b82f6;
+  }
+  
+  .searchResults {
+    position: absolute;
+    z-index: 10;
+    margin-top: 0.25rem;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    width: 100%;
+    max-height: 15rem;
+    overflow-y: auto;
+  }
+  
+  .chatList {
+    overflow-y: auto;
+    height: calc(100vh - 5rem);
+  }
+  
+  .chatItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+  }
+  
+  .chatItem:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .selectedChatItem {
+    background-color: #eff6ff;
+  }
+  
+  .chatAvatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    object-fit: cover;
+  }
+  
+  .chatDetails {
+    margin-left: 1rem;
+    flex-grow: 1;
+  }
+  
+  .chatHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  
+  .chatName {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .chatTime {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .chatMessage {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .chatsTitle {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+  }
+  

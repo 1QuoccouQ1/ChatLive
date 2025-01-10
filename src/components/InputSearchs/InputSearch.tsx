@@ -1,13 +1,8 @@
 import { Search } from "lucide-react";
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  ChangeEvent,
-  KeyboardEvent,
-} from "react";
+import React from "react";
 import { InputSearchProps } from "./type";
 import { useInputSearch } from "./hook";
+import styles from './styles.module.scss'; 
 
 const InputSearch: React.FC<InputSearchProps> = ({
   onSearch,
@@ -27,9 +22,9 @@ const InputSearch: React.FC<InputSearchProps> = ({
   } = useInputSearch(onSearch, onSetIsSearch, onSetLoading, onQueryChange);
 
   return (
-    <>
+    <div className={styles.inputWrapper}>
       <span
-        className="absolute inset-y-0 left-0 flex items-center pl-3"
+        className={styles.searchIcon}
         onClick={() => {
           debouncedSearch.cancel();
           if (query.trim() !== "" && query !== lastQuery) {
@@ -47,10 +42,10 @@ const InputSearch: React.FC<InputSearchProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={onFocus}
         onBlur={onBlur}
-        className="border-none mx-2 w-full md:w-[270px] lg:w-[350px] bg-transparent focus:outline-none text-white text-sm placeholder-gray-600"
+        className={styles.inputField}
         placeholder="Tìm kiếm....."
       />
-    </>
+    </div>
   );
 };
 
